@@ -1,0 +1,27 @@
+--- # Install nginx Server and deploy html file
+
+- hosts: appserver
+  become: yes
+  remote_user: devops
+  gather_facts: yes
+  vars:
+    - pkg_name: nginx
+  tasks:
+    - name:  Ensure nginx is at the latest version
+      command : "sudo amazon-linux-extras install nginx1 -y"
+      notify: Restarting nginx Server
+    - name: Start the nginx  Server
+      service:
+        name:  "{{ pkg_name }}"
+        state: started
+        enabled: yes
+    - name: Deploy html file
+      copy:
+        src: index.html
+        dest: /usr/share/nginx/html
+      notify: Restarting nginx Server
+  handlers:
+    - name: Restarting nginx Server
+      service:
+        name: "{{ pkg_name }}"
+        state: restarted
