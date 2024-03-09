@@ -1,0 +1,29 @@
+--- # Install Http Server and deploy html file
+
+- hosts: webserver
+  become: yes
+  remote_user: devops
+  gather_facts: yes
+  vars:
+    - pkg_name: httpd
+  tasks:
+    - name:  Ensure apache is at the latest version
+      yum:
+        name: "{{ pkg_name }}"
+        state: latest
+      notify: Restarting httpd Server
+    - name: Start the Httpd Server
+      service:
+        name:  "{{ pkg_name }}"
+        state: started
+        enabled: yes
+    - name: Deploy html file
+      copy:
+        src: index.html
+        dest: /var/www/html/
+      notify: Restarting httpd Server
+  handlers:
+    - name: Restarting httpd Server
+      service:
+        name: "{{ pkg_name }}"
+        state: restarted
